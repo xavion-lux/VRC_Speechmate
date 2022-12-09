@@ -1,0 +1,33 @@
+[tasks.format]
+install_crate = "rustfmt"
+command = "cargo"
+args = ["fmt", "--", "--emit=files"]
+
+[tasks.clean]
+command = "cargo"
+args = ["clean"]
+
+[tasks.build]
+command = "cargo"
+args = ["build", "--release"]
+dependencies = ["clean"]
+
+[tasks.release_build_linux]
+script_runner = "@shell"
+script = "mold -run cargo build --release --target x86_64-unknown-linux-gnu # shell2batch: cargo build --release --target x86_64-unknown-linux-gnu"
+
+[tasks.release_build_windows]
+script_runner = "@shell"
+script = "cargo build --release --target x86_64-pc-windows-msvc"
+dependencies = ["clean"]
+
+[tasks.copy_libs]
+script_runner = "@shell"
+script='''cp -r lib/. $CARGO_MAKE_CRATE_TARGET_DIRECTORY/$CARGO_MAKE_CARGO_PROFILE'''
+
+[tasks.my]
+dependencies = [
+    "format",
+    "release_build_windows",
+    "copy_libs"
+]
